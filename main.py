@@ -21,7 +21,7 @@ import datetime
 
 st.set_page_config(page_title = "egos", layout="wide")
 
-file = "C:/Users/egos/Mon Drive/ORDI/PERSO/journal_2023.xlsx"
+file = "journal_2023.xlsx"
 dfr = pd.read_excel(file, engine= "openpyxl",  header=0, sheet_name = "Feuil1", usecols  = "A:AK")
 dfr = dfr[dfr.detail.notnull()]
 # dfr.loc[dfr==None] = np.NAN
@@ -56,10 +56,11 @@ colvrac = ['sport', 'vel', 'taf', 'Sup', 'projet', 'WB', 'S', 'admin', 'contact'
 if len(d) ==2 : 
     dfr = dfr[(dfr.date >= np.datetime64(begin)) & (dfr.date<=np.datetime64(end))]
     for idx , row in dfr.iterrows():
-        stcol  = st.columns(4)
+        stcol  = st.columns(3)
         stcol[0].text(row.date.strftime("%A-%d-%B-%Y"))
         stcol[1].text(row[['A','P','C']].to_dict())
-        st.text(row[colvrac].to_dict())
+        data = (row[colvrac].index[row[colvrac].notnull()].tolist())
+        stcol[2].text(data)
         # stcol[1].dataframe(row[['A','P','C']])
         st.write(row.detail)
         st.write(row.resum)
