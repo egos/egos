@@ -54,6 +54,7 @@ d  = stcol[0].date_input(
 colvrac = ['sport', 'vel', 'taf', 'Sup', 'projet', 'WB', 'S', 'admin', 'contact',
        'call', 'famille', 'L', 'WTF']
 if len(d) ==2 : 
+    begin , end = d
     dfr = dfr[(dfr.date >= np.datetime64(begin)) & (dfr.date<=np.datetime64(end))]
     for idx , row in dfr.iterrows():
         stcol  = st.columns(3)
