@@ -21,42 +21,71 @@ import datetime
 
 st.set_page_config(page_title = "egos", layout="wide")
 
-file = "journal_2023.xlsx"
-dfr = pd.read_excel(file, engine= "openpyxl",  header=0, sheet_name = "Feuil1", usecols  = "A:AK")
-dfr = dfr[dfr.detail.notnull()]
-# dfr.loc[dfr==None] = np.NAN
-fig = px.line(dfr.set_index('date')[['A','P']].rolling(7).mean(), color_discrete_map={"A": "blue", "P": "green"})
-fig.update_layout(        
-                # yaxis_title ='count',
-                # xaxis_title ='epoch',
-                height=500,
-                font=dict(size=16,family = "Arial"),
-                margin=dict(l=10, r=10, t=30, b=10),
-                )
+def Fig_conso(dfr,begin, end,idx):
+    
+    Rolling = [1,2,7,30][idx]
+    dfp = dfr.set_index('date')[['A','P']].fillna(0)
+    dfp = dfp.rolling(Rolling).mean()
+    fig = px.line(dfp, color_discrete_map={"A": "blue", "P": "green"})
+    fig.update_layout(        
+                    height=500,
+                    font=dict(size=16,family = "Arial"),
+                    margin=dict(l=10, r=10, t=30, b=10),
+                    )
+    return fig
 
+if 'algo' not in session_state: 
+    print(' ')
+    print('BEGIN')
+    algo = {}
+    dfr = pd.read_excel("journal_2023.xlsx", engine= "openpyxl",  header=0, sheet_name = "Feuil1", usecols  = "A:AK")
+    dfr = dfr[dfr.detail.notnull()]
+    algo = dict(
+        dfr= dfr
+    )
+    algo = SimpleNamespace(**algo)
+    session_state['algo'] = algo
+else : 
+    algo = session_state['algo']
 
-st.plotly_chart(fig, use_container_width=True)
-# datetime.date(2019, 7, 6)
+algo = session_state['algo']
+dfr  = algo.dfr.copy()
+
+Stfig = st.empty()
+
+c1, c2 = st .columns([5,1])
+idx = c1.slider('idx',0,3)
+rolling = [1,2,7,30][idx]
+c2.metric("rolling",rolling)
+# c2.write([1,2,7,30][idx])
+# print(idx, [1,2,7,30][idx])
 begin = dfr.iloc[len(dfr)-12].date
 end = dfr.iloc[-1].date
+
 stcol  = st.columns(4)
-# begin  = stcol[0].date_input("begin", begin)
-# end  = stcol[1].date_input("end", end)
-
-
 d  = stcol[0].date_input(
     "Select your vacation for next year",
     (begin, end),
-    max_value  = end,
+    min_value = dfr.iloc[0].date,
+    max_value = end,
     format="MM-DD-YYYY",
 )
+AllData = stcol[1].toggle('AllData')
+colvrac = ['sport', 'vel', 'taf', 'Sup', 'projet', 'WB', 'S', 'admin', 'contact','call', 'famille', 'L', 'WTF']
 
-colvrac = ['sport', 'vel', 'taf', 'Sup', 'projet', 'WB', 'S', 'admin', 'contact',
-       'call', 'famille', 'L', 'WTF']
 if len(d) ==2 : 
+    fig = Fig_conso(dfr,begin, end, idx)
+    
     begin , end = d
-    dfr = dfr[(dfr.date >= np.datetime64(begin)) & (dfr.date<=np.datetime64(end))]
-    for idx , row in dfr.iterrows():
+    
+    dfr2 = dfr[(dfr.date >= np.datetime64(begin)) & (dfr.date<=np.datetime64(end))]
+    if  AllData: 
+        fig = Fig_conso(dfr,begin, end, idx)
+    else :
+        fig = Fig_conso(dfr2 ,begin, end, idx)
+    Stfig.plotly_chart(fig, use_container_width=True)
+
+    for idx , row in dfr2.iterrows():
         stcol  = st.columns(3)
         stcol[0].text(row.date.strftime("%A-%d-%B-%Y"))
         stcol[1].text(row[['A','P','C']].to_dict())
