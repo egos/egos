@@ -3,3 +3,4 @@ XlsxWriter
 plotly
 matplotlib
 streamlit
+firebase_admin

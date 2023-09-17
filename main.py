@@ -18,6 +18,8 @@ import time
 import pickle
 from types import SimpleNamespace
 import datetime
+import firebase_admin
+from firebase_admin import firestore
 
 st.set_page_config(page_title = "egos", layout="wide")
 
@@ -33,6 +35,16 @@ def Fig_conso(dfr,begin, end,idx):
                     margin=dict(l=10, r=10, t=30, b=10),
                     )
     return fig
+
+# key_dict = json.loads(st.secrets['textkey'])
+key = json.loads(st.secrets['textkey'])
+cred = firebase_admin.credentials.Certificate(key)
+url = "https://my-project-1508716972638-default-rtdb.europe-west1.firebasedatabase.app"
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred,    {'databaseURL' : url} ) 
+
+db = firebase_admin.firestore.client()
+
 
 if 'algo' not in session_state: 
     print(' ')
