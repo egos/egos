@@ -19,7 +19,7 @@ import pickle
 from types import SimpleNamespace
 import datetime
 import firebase_admin
-from firebase_admin import firestore
+from firebase_admin import db, credentials, _apps, initialize_app
 
 st.set_page_config(page_title = "egos", layout="wide")
 
@@ -36,21 +36,22 @@ def Fig_conso(dfr,begin, end,idx):
                     )
     return fig
 
-# key_dict = json.loads(st.secrets['textkey'])
-key = json.loads(st.secrets['textkey'])
-cred = firebase_admin.credentials.Certificate(key)
-url = "https://my-project-1508716972638-default-rtdb.europe-west1.firebasedatabase.app"
+
 if not firebase_admin._apps:
-    firebase_admin.initialize_app(cred,    {'databaseURL' : url} ) 
+    key = json.loads(st.secrets['textkey'])
+    url = "https://my-project-1508716972638-default-rtdb.europe-west1.firebasedatabase.app"
+    cred = credentials.Certificate(key)
+    app = initialize_app(cred,{'databaseURL' : url} ) 
 
-db = firebase_admin.firestore.client()
-
+ref = db.reference("egos/V2")
 
 if 'algo' not in session_state: 
     print(' ')
-    print('BEGIN')
+    print('IMPORT DB')
     algo = {}
-    dfr = pd.read_excel("journal_2023.xlsx", engine= "openpyxl",  header=0, sheet_name = "Feuil1", usecols  = "A:AK")
+    res = ref.get()
+    dfr = pd.read_json(res)
+    # dfr = pd.read_excel("journal_2023.xlsx", engine= "openpyxl",  header=0, sheet_name = "Feuil1", usecols  = "A:AK")
     dfr = dfr[dfr.detail.notnull()]
     algo = dict(
         dfr= dfr
