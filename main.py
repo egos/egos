@@ -23,15 +23,8 @@ from firebase_admin import db, credentials, initialize_app
 
 st.set_page_config(page_title = "egos", layout="wide")
 
-colActivity = ['sport', 'vel', 'taf', 'Sup', 'projet', 'WB', 'S', 'admin', 'contact','call', 'famille', 'L', 'WTF']
-colConso = ['A', 'P', 'C', 'T','B','Lx','couche']
-colInfo = ['game','Vibe']
-colLocation = ['chup  ','levé', 'matin', 'aprem', 'nuit']
-colTrigger = ['calin','bouffe', 'cauchemar', 'sante', 'vacance']
-colText = ['detail','resum', 'TAF', 'vie']
-ColsLists = [colConso , colActivity , colTrigger ,colInfo ,colLocation]
-ColsTypes = [int,bool, bool, str, str]
-ColsDefaultValue = [0,False, False, '', '']
+
+
 def Fig_conso(dfr,begin, end,idx):
     
     Rolling = [1,2,7,30][idx]
@@ -48,6 +41,8 @@ def Fig_conso(dfr,begin, end,idx):
                     margin=dict(l=10, r=10, t=30, b=10),
                     )
     return fig
+
+
 
 if not firebase_admin._apps:
     key = json.loads(st.secrets['textkey'])
@@ -80,6 +75,16 @@ algo = session_state['algo']
 dfr  = algo.dfr.copy()
 DateToday = datetime.date.today()
 with st.expander('Push ', True):
+    colActivity = ['sport', 'vel', 'taf', 'Sup', 'projet', 'WB', 'S', 'admin', 'contact','call', 'famille', 'L', 'WTF']
+    colConso = ['A', 'P', 'C', 'T','B','Lx','couche']
+    colInfo = ['game','Vibe']
+    colLocation = ['chup  ','levé', 'matin', 'aprem', 'nuit']
+    colTrigger = ['calin','bouffe', 'cauchemar', 'sante', 'vacance']
+    colText = ['detail','resum', 'TAF', 'vie']
+    ColsLists = [colConso , colActivity , colTrigger ,colInfo ,colLocation]
+    ColsTypes = [int,bool,bool, str, str]
+    ColsDefaultValue = [0,False, False, '', '']
+
     stcol  = st.columns(4)
     date  = stcol[0].date_input(
         "Date  / today = " + str(DateToday),
@@ -94,9 +99,11 @@ with st.expander('Push ', True):
             s = dfr.loc[date,Cols]
         else :
             s = pd.Series([ColsDefaultValue[i]] * len(Cols), index = Cols)
-        s = s.to_frame().T
+        
+        s = s.to_frame().T.astype(ColsTypes[i])
+        # print(s.dtypes)
         # sx = Stcol[i].data_editor(s, hide_index= True)
-        sx = st.data_editor(s)
+        sx = st.data_editor(s, hide_index= True)
         d.update(sx.iloc[0].to_dict())
     for c in colText:
         Textdefault = dfr.loc[date,c]  if date in dfr.index else ''
