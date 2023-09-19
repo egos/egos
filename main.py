@@ -100,7 +100,7 @@ with st.expander('Push ', True):
         else :
             s = pd.Series([ColsDefaultValue[i]] * len(Cols), index = Cols)
         
-        s = s.to_frame().T.astype(ColsTypes[i])
+        s = s.to_frame().T
         # print(s.dtypes)
         # sx = Stcol[i].data_editor(s, hide_index= True)
         sx = st.data_editor(s, hide_index= True)
